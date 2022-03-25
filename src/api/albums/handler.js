@@ -1,30 +1,36 @@
 /* eslint-disable no-underscore-dangle */
 const ClientError = require('../../exceptions/ClientError');
 
-class NotesHandler {
+class AlbumsHandler {
+  // constructor for feaure - albums
   constructor(service, validator) {
-    this._service = service;
     this._validator = validator;
+    this._service = service;
 
-    this.postNoteHandler = this.postNoteHandler.bind(this);
-    this.getNotesHandler = this.getNotesHandler.bind(this);
-    this.getNoteByIdHandler = this.getNoteByIdHandler.bind(this);
-    this.putNoteByIdHandler = this.putNoteByIdHandler.bind(this);
-    this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
+    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
+    this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
+    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
+    this.getAlbumsHandler = this.getAlbumsHandler.bind(this);
+    this.postAlbumHandler = this.postAlbumHandler.bind(this);
   }
 
-  async postNoteHandler(request, h) {
+  // Handler for post adding album
+  async postAlbumHandler(request, h) {
     try {
-      this._validator.validateNotePayload(request.payload);
-      const { title = 'untitled', body, tags } = request.payload;
+      this._validator.validateAlbumPayload(request.payload);
+      const {
+        name = 'untitled', year,
+      } = request.payload;
 
-      const noteId = await this._service.addNote({ title, body, tags });
+      const albumId = await this._service.addAlbum({
+        name, year,
+      });
 
       const response = h.response({
         status: 'success',
-        message: 'Catatan berhasil ditambahkan',
+        message: 'Album is succeed to add',
         data: {
-          noteId,
+          albumId,
         },
       });
       response.code(201);
@@ -39,10 +45,10 @@ class NotesHandler {
         return response;
       }
 
-      // Server ERROR!
+      // Setting Server ERROR!
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
+        message: 'Sorry, our server is under maintenance. Please visit web in another time',
       });
       response.code(500);
       console.error(error);
@@ -50,24 +56,26 @@ class NotesHandler {
     }
   }
 
-  async getNotesHandler() {
-    const notes = await this._service.getNotes();
+  // Handler for get all albums
+  async getAlbumsHandler() {
+    const albums = await this._service.getAlbums();
     return {
       status: 'success',
       data: {
-        notes,
+        albums,
       },
     };
   }
 
-  async getNoteByIdHandler(request, h) {
+  // Handler for get an album
+  async getAlbumByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      const note = await this._service.getNoteById(id);
+      const album = await this._service.getAlbumById(id);
       return {
         status: 'success',
         data: {
-          note,
+          album,
         },
       };
     } catch (error) {
@@ -80,10 +88,10 @@ class NotesHandler {
         return response;
       }
 
-      // Server ERROR!
+      // Setting Server ERROR!
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
+        message: 'Sorry, our server is under maintenance. Please visit web in another time',
       });
       response.code(500);
       console.error(error);
@@ -91,17 +99,22 @@ class NotesHandler {
     }
   }
 
-  async putNoteByIdHandler(request, h) {
+  // Handler for update an album
+  async putAlbumByIdHandler(request, h) {
     try {
-      this._validator.validateNotePayload(request.payload);
-      const { title, body, tags } = request.payload;
+      this._validator.validateAlbumPayload(request.payload);
+      const {
+        name, year,
+      } = request.payload;
       const { id } = request.params;
 
-      await this._service.editNoteById(id, { title, body, tags });
+      await this._service.editAlbumById(id, {
+        name, year,
+      });
 
       return {
         status: 'success',
-        message: 'Catatan berhasil diperbarui',
+        message: 'Album is succeed to update',
       };
     } catch (error) {
       if (error instanceof ClientError) {
@@ -113,10 +126,10 @@ class NotesHandler {
         return response;
       }
 
-      // Server ERROR!
+      // Setting Server ERROR!
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
+        message: 'Sorry, our server is under maintenance. Please visit web in another time.',
       });
       response.code(500);
       console.error(error);
@@ -124,14 +137,15 @@ class NotesHandler {
     }
   }
 
-  async deleteNoteByIdHandler(request, h) {
+  // Handler for delete an album
+  async deleteAlbumByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      await this._service.deleteNoteById(id);
+      await this._service.deleteAlbumById(id);
 
       return {
         status: 'success',
-        message: 'Catatan berhasil dihapus',
+        message: 'Album is succeed to delete',
       };
     } catch (error) {
       if (error instanceof ClientError) {
@@ -143,10 +157,10 @@ class NotesHandler {
         return response;
       }
 
-      // Server ERROR!
+      // Setting Server ERROR!
       const response = h.response({
         status: 'error',
-        message: 'Maaf, terjadi kegagalan pada server kami.',
+        message: 'Sorry, our server is under maintenance. Please visit web in another time',
       });
       response.code(500);
       console.error(error);
@@ -155,4 +169,4 @@ class NotesHandler {
   }
 }
 
-module.exports = NotesHandler;
+module.exports = AlbumsHandler;
